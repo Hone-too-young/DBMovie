@@ -1,0 +1,36 @@
+spring:
+  main:
+    allow-circular-references: true
+  #MySQL???
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://1.117.171.206:3307/db_movie?allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+    username: root
+    password: 034389
+    hikari:
+      max-lifetime: 120000
+  #redis???
+  redis:
+    host: 1.117.171.206
+    port: 6379
+    jedis:
+      pool:
+        max-active: -1
+        max-wait: 30000ms
+    timeout: 30000ms
+    password: 034389
+  mvc:
+    static-path-pattern: /db/user/**
+    resources:
+      static-locations: file:E:/test/DBMovie/target/classes/static/upload
+file:
+  # 服务器上的地址
+  staticAccessPath: /db/user
+  # 本地路径
+  uploadFolder: E:/test/DBMovie/target/classes/static/upload
+server:
+  servlet:
+    encoding:
+      charset: utf-8
+      enabled: true
+      force: true
