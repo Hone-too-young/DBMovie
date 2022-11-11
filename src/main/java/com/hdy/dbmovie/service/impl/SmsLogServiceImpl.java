@@ -73,12 +73,12 @@ public class SmsLogServiceImpl extends ServiceImpl<SmsLogMapper, SmsLog> impleme
                     .eq(SmsLog::getUserPhone, mobile)
                     .eq(SmsLog::getType, smsType.value())));
             if (todaySendSmsNumber >= TODAY_MAX_SEND_VALID_SMS_NUMBER) {
-                throw new dbBindException("今日发送短信验证码次数已达到上限");
+                return new Result(200,"今日发送短信验证码次数已达到上限");
             }
             //从redis获取验证码，如果能获取，直接返回未过期
             String lastCode = redisTemplate.opsForValue().get(mobile);
             if (StringUtils.hasText(lastCode)){
-                throw new dbBindException("验证码未过期");
+                return new Result(200,"验证码未过期");
             }
 
             // 将上一条验证码失效

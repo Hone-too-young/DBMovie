@@ -13,11 +13,6 @@ public class SmsLog {
      */
     private Long id;
 
-    /**
-     * 用户id
-     */
-
-    private String userId;
 
     /**
      * 手机号码
@@ -46,12 +41,6 @@ public class SmsLog {
      */
 
     private Date recDate;
-
-    /**
-     * 发送短信返回码
-     */
-
-    private String responseCode;
 
     /**
      * 状态  1:有效  0：失效

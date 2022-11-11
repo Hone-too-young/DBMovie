@@ -124,7 +124,7 @@ public class CommentController {
     public Result delete(@PathVariable Serializable cid) {
         Comment comment = commentService.getById(cid);
         //移除redis缓存
-        RedisUtil.hdel(comment.getFilmId() + "/comment:all", comment);
+        RedisUtil.hdel(comment.getFilmId() + "/comment:all",cid);
         return new Result(commentService.removeById(cid));
     }
 

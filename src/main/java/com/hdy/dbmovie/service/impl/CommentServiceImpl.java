@@ -42,22 +42,18 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                     //点踩数
                     long dislikeNo = RedisUtil.sGetSetSize("comment/dislike:" + comment.getCid());
                     //更新点赞数并存入数据库（短评表）
-                    comment.setLikeNo((int) likeNo);
                     commentService.update(new LambdaUpdateWrapper<Comment>().eq(Comment::getCid, comment.getCid()).set(Comment::getLikeNo, likeNo));
-                    comment.setDislikeNo((int) dislikeNo);
                     commentService.update(new LambdaUpdateWrapper<Comment>().eq(Comment::getCid, comment.getCid()).set(Comment::getDislikeNo, dislikeNo));
                 }
         );
         commentReplyService.list().forEach(reply -> {
             //点赞数
-            long likeNo = RedisUtil.sGetSetSize("reply/like:" + reply.getCid());
+            long likeNo = RedisUtil.sGetSetSize("reply/like:" + reply.getRid());
             //点踩数
-            long dislikeNo = RedisUtil.sGetSetSize("reply/dislike:" + reply.getCid());
+            long dislikeNo = RedisUtil.sGetSetSize("reply/dislike:" + reply.getRid());
             //更新点赞数并存入数据库（短评表）
-            reply.setLikeNo((int) likeNo);
-            commentReplyService.update(new LambdaUpdateWrapper<CommentReply>().eq(CommentReply::getCid, reply.getRid()).set(CommentReply::getLikeNo, likeNo));
-            reply.setDislikeNo((int) dislikeNo);
-            commentReplyService.update(new LambdaUpdateWrapper<CommentReply>().eq(CommentReply::getCid, reply.getRid()).set(CommentReply::getDislikeNo, dislikeNo));
+            commentReplyService.update(new LambdaUpdateWrapper<CommentReply>().eq(CommentReply::getRid, reply.getRid()).set(CommentReply::getLikeNo, likeNo));
+            commentReplyService.update(new LambdaUpdateWrapper<CommentReply>().eq(CommentReply::getRid, reply.getRid()).set(CommentReply::getDislikeNo, dislikeNo));
         });
     }
 }

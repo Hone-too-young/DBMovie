@@ -5,14 +5,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hdy.dbmovie.common.bean.Result;
 import com.hdy.dbmovie.component.FilmComponent;
 import com.hdy.dbmovie.pojo.Film;
+import com.hdy.dbmovie.pojo.HistoryRecord;
 import com.hdy.dbmovie.service.FilmService;
+import com.hdy.dbmovie.service.HistoryRecordService;
 import com.hdy.dbmovie.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +32,10 @@ public class FilmController{
      */
     @Resource
     private FilmService filmService;
-    @Autowired FilmController filmController;
     @Resource
     private FilmComponent filmComponent;
+    @Resource
+    private HistoryRecordService historyRecordService;
 
     /**
      * 分页查询所有数据
@@ -51,15 +53,20 @@ public class FilmController{
     }
 
     /**
-     * 通过主键查询单条数据
+     * 通过主键查询电影详情
      *
      * @param id 主键
      * @return 单条数据
      */
-    @GetMapping("/{id}")
-    public Result selectOne(@PathVariable Serializable id) {
+    @GetMapping("/{id}/{userId}")
+    public Result selectOne(@PathVariable String id,@PathVariable String userId) {
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<Film> list=new ArrayList<>();
         list.add(filmService.getById(id));
+        //存入历史记录 过期时间为七天
+        RedisUtil.set("HRecords:"+userId+":"+id,simpleDateFormat.format(System.currentTimeMillis()),60*60*24*7);
+        //存入数据库
+        historyRecordService.saveOrUpdate(new HistoryRecord(id,userId));
         return filmComponent.showCelebrities(new Page<Film>().setRecords(new ArrayList<>(list)));
     }
     /**
@@ -86,8 +93,7 @@ public class FilmController{
                 RedisUtil.zAdd("Film:",film,Double.parseDouble(s));
             });
         }
-        Result result = new Result(200, "热门电影排行：", RedisUtil.zReverseRange("Film:", 0, No));
-        return result;
+        return new Result(200, "热门电影排行：", RedisUtil.zReverseRange("Film:", 0, No));
     }
 }
 

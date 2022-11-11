@@ -8,10 +8,7 @@ import com.hdy.dbmovie.utils.MD5Util;
 import com.hdy.dbmovie.utils.RedisUtil;
 import com.hdy.dbmovie.utils.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,15 +27,14 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     public Result login(@RequestParam String username, @RequestParam String password, HttpServletResponse response) {
         //获取用户信息
         User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getNickName, username));
         //解密校验密码
-        String encryptPwd = MD5Util.Encrypt(password, user.getUserRegisterTime().toString());
-        if(user.equals(null)){
+        if(user==null){
                 return new Result(400,"用户不存在");
-        }else if(!user.getLoginPassword().equals(encryptPwd)){
+        }else if(!user.getLoginPassword().equals(MD5Util.Encrypt(password, user.getUserRegisterTime().toString()))){
                 return new Result(400,"密码错误");
         }
         Long currentTimeMillis = System.currentTimeMillis();
@@ -53,7 +49,7 @@ public class LoginController {
         redisUtil.del(TokenUtil.getAccount(httpServletRequest.getHeader("token")));
         httpServletResponse.setHeader("Authorization",null);
         httpServletResponse.setHeader("Access-Control-Expose-Headers", "Authorization");
-        return new Result().OK();
+        return new Result(200,"退出登录！");
     }
 
 
