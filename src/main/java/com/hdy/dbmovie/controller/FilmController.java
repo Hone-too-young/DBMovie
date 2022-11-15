@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 电影表(DbFilm)表控制层
@@ -85,15 +86,23 @@ public class FilmController{
 
     @GetMapping("/rank/{No}")
     public Result rank(Page<Film> page,@PathVariable Long No){
-        List<Film> filmList = this.filmService.page(page).getRecords();
+        List<Film> filmList;
         if (!RedisUtil.hasKey("Film:")){
+            filmList=this.filmService.page(page).getRecords();
             filmList.forEach(film -> {
                 StringBuilder stringBuilder=new StringBuilder(film.getScore());
                 String s = stringBuilder.substring(stringBuilder.indexOf("score") + 9, stringBuilder.indexOf("score") + 12);
                 RedisUtil.zAdd("Film:",film,Double.parseDouble(s));
             });
         }
-        return new Result(200, "热门电影排行：", RedisUtil.zReverseRange("Film:", 0, No));
+        Set<Object> films;
+        try {
+            films = RedisUtil.zReverseRange("Film:", 0, No);
+        } catch (Exception e) {
+            log.error("Redis崩溃！！");
+            return new Result(200,"热门电影排行：",filmService.page(page));
+        }
+        return new Result(200, "热门电影排行：", films);
     }
 }
 

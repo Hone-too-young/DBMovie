@@ -108,8 +108,9 @@ public class RedisConfig {
     }
 
     @Bean
-    RedisMessageListenerContainer container(LettuceConnectionFactory connectionFactory){
-        RedisMessageListenerContainer container= new RedisMessageListenerContainer();
+    RedisMessageListenerContainer container(LettuceConnectionFactory connectionFactory) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        return container;}
+        return container;
+    }
 }

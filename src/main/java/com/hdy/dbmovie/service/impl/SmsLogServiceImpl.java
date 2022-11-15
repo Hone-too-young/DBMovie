@@ -1,4 +1,3 @@
-
 package com.hdy.dbmovie.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
@@ -34,29 +33,24 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class SmsLogServiceImpl extends ServiceImpl<SmsLogMapper, SmsLog> implements SmsLogService {
 
-    private final SmsLogMapper smsLogMapper;
-
     /**
      * 当天最大验证码短信发送量
      */
     private static final int TODAY_MAX_SEND_VALID_SMS_NUMBER = 10;
-
     /**
      * 一段时间内短信验证码的最大验证次数
      */
     private static final int TIMES_CHECK_VALID_CODE_NUM = 10;
-
     /**
      * 短信验证码的前缀
      */
     private static final String CHECK_VALID_CODE_NUM_PREFIX = "checkValidCodeNum_";
-
     /**
      * 短信发送成功的标志
      */
     private static final String SEND_SMS_SUCCESS_FLAG = "OK";
-
-    private RedisTemplate<String,String> redisTemplate;
+    private final SmsLogMapper smsLogMapper;
+    private RedisTemplate<String, String> redisTemplate;
 
 
     @Override
@@ -73,18 +67,20 @@ public class SmsLogServiceImpl extends ServiceImpl<SmsLogMapper, SmsLog> impleme
                     .eq(SmsLog::getUserPhone, mobile)
                     .eq(SmsLog::getType, smsType.value())));
             if (todaySendSmsNumber >= TODAY_MAX_SEND_VALID_SMS_NUMBER) {
-                return new Result(200,"今日发送短信验证码次数已达到上限");
+                return new Result(200, "今日发送短信验证码次数已达到上限");
             }
             //从redis获取验证码，如果能获取，直接返回未过期
             String lastCode = redisTemplate.opsForValue().get(mobile);
-            if (StringUtils.hasText(lastCode)){
-                return new Result(200,"验证码未过期");
+            if (StringUtils.hasText(lastCode)) {
+                return new Result(200, "验证码未过期");
             }
 
             // 将上一条验证码失效
             smsLogMapper.invalidSmsByMobileAndType(mobile, smsType.value());
             redisTemplate.delete(mobile);
-            String code = RandomUtil.randomNumbers(6);
+            String code = "000000";
+            while (code.charAt(0) == 0)
+                code = RandomUtil.randomNumbers(6);
             params.put("code", code);
         }
         smsLog.setType(smsType.value());
@@ -95,11 +91,11 @@ public class SmsLogServiceImpl extends ServiceImpl<SmsLogMapper, SmsLog> impleme
         smsLog.setContent(formatContent(smsType, params));
         smsLogMapper.insert(smsLog);
 
-            //this.sendSms(mobile, smsType.getTemplateCode(), params);
-            // 发送成功，存入redis,5分钟
-            redisTemplate.opsForValue().set(mobile,params.get("code"),5, TimeUnit.MINUTES);
-            String contents="【豆拌电影】"+smsLog.getContent();
-        return new Result(200,"发送成功",contents);
+        //this.sendSms(mobile, smsType.getTemplateCode(), params);
+        // 发送成功，存入redis,5分钟
+        redisTemplate.opsForValue().set(mobile, params.get("code"), 5, TimeUnit.MINUTES);
+        String contents = "【豆拌电影】" + smsLog.getContent();
+        return new Result(200, "发送成功", contents);
     }
 
     private String formatContent(SmsType smsType, Map<String, String> params) {

@@ -4,17 +4,17 @@ spring:
       allow-numeric-leading-zeros: true
   main:
     allow-circular-references: true
-  #MySQL???
+  #MySQL
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://1.117.171.206:3308/db_movie?allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+    url: jdbc:mysql://mysql:3308/db_movie?allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
     username: root
     password: 034389
     hikari:
       max-lifetime: 120000
-  #redis???
+  #redis
   redis:
-    host: 1.117.171.206
+    host: redis
     port: 6379
     jedis:
       pool:

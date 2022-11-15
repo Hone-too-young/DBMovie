@@ -15,7 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service("commentGiveLikeService")
@@ -33,7 +36,6 @@ public class CommentGiveLikeServiceImpl implements GiveLikeService {
      * @return
      */
     public static List<Comment> getCommentMapSortedByLike(Serializable filmId) {
-        LinkedHashMap<Object, Comment> linkedHashMap;
         List<Comment> list;
         log.info("redis查询电影短评");
         //取出电影所有短评
