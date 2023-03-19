@@ -1,14 +1,59 @@
-version: '3'
+version: '3.7'
 services:
-  mobile-web-best-practice: DB-Movie
-    container_name: 'db-movie' #容器名称
-    image: nginx #指定镜像
+  mysql:
+    environment:
+      MYSQL_ROOT_PASSWORD: 034389
+      TZ: Asia/Shanghai
     restart: always
-    ports:
-      - 8099:8099
     volumes:
-      #~ ./nginx.conf为宿主机目录, /etc/nginx为容器目录
-      - ./nginx.conf:/etc/nginx/nginx.conf #挂载nginx配置
-      #~ ./dist 为宿主机 build 后的dist目录, /usr/src/app为容器目录,
-      - ./dist:/usr/share/nginx/html/ #挂载项目
-    privileged: true
+        - /home/docker/mysql8.x/data:/var/lib/mysql
+        - /home/docker/mysql8.x/conf/my.cnf:/etc/mysql/my.cnf
+        - /home/docker/mysql8.x/logs:/logs
+        - /etc/localtime:/etc/localtime
+    container_name: mysql
+    image: mysql:latest
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --max_allowed_packet=128M
+      --default-authentication-plugin=caching_sha2_password #解决外部无法访问
+    ports:
+        - 3308:3306
+        - 3309:33060
+    # networks:
+    #     - hdy_net
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: always
+    container_name: redis
+    volumes:
+        - /home/docker/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+        - /home/docker/redis/data:/data
+    # networks:
+    #     - hdy_net
+    command:  redis-server /usr/local/etc/redis/redis.conf
+
+  DB-Movie:
+    build:
+      context: ../DBMovie/ #指定的DockerFIle的文件路径 生成镜像
+      dockerfile: Dockerfile
+    restart: on-failure
+    volumes: 
+        - /home/docker/DBMovie/data:/data
+    depends_on:
+      - mysql
+      - redis
+    container_name: DB-Movie
+    image: dbmovie:1.0
+    ports:
+      - 8098:8098
+    # networks:
+    #   - hdy_net
+      
+# networks:
+#     hdy_net:
